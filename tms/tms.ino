@@ -1,87 +1,69 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "sonar.h"
 
-// --------- USER CONFIG ----------
-const char* WIFI_SSID = "Vodafone-C46752547";
-const char* WIFI_PASS = "hshPHA97mAxKn6Nc";
+/* wifi network info */
+const char* ssid = "Vodafone-C46752547";
+const char* password = "hshPHA97mAxKn6Nc";
 
-// If broker is your PC running Mosquitto or your Spring Boot app is NOT an MQTT broker.
-// Use a real broker address (Mosquitto on PC recommended).
-const char* MQTT_HOST = "broker.mqtt-dashboard.com";
-const int   MQTT_PORT = 1883;
+/* MQTT server address */
+const char* mqtt_server = "broker.mqtt-dashboard.com";
 
-const char* TOPIC_LEVEL = "esiot/tank/level";
+/* MQTT topic */
+const char* topic = "esiot/waterDepth";
 
-// Sampling frequency F (ms)
+/* Sampling frequency F (ms) */ 
 const unsigned long SAMPLE_PERIOD_MS = 1000;
 
-// Thresholds are handled by CUS; TMS only measures.
-// Tank geometry (example): tank height in cm, used to compute level from distance
 const float TANK_HEIGHT_CM = 100.0;
 
-// Pins (change to your wiring)
-const int PIN_TRIG = 26;
-const int PIN_ECHO = 25;
+const int SONAR_TRIGGER_PIN = 26;
+const int SONAR_ECHO_PIN = 25;
 
-const int PIN_LED_GREEN = 2;  
-const int PIN_LED_RED   = 4;
-// --------------------------------
+const int GREEN_LED_PIN = 2;  
+const int RED_LED_PIN = 4;
 
 WiFiClient espClient;
 PubSubClient mqtt(espClient);
 
-enum class State { BOOT, WIFI_CONNECTING, MQTT_CONNECTING, OPERATIONAL, NET_ERROR };
-State state = State::BOOT;
+enum class State { INIT, WIFI_CONNECTING, MQTT_CONNECTING, FUNCTIONING, NET_ERROR };
+State state = State::INIT;
 
 unsigned long lastSampleMs = 0;
 unsigned long lastConnectAttemptMs = 0;
 
-static void setLedsOk(bool ok) {
-  digitalWrite(PIN_LED_GREEN, ok ? HIGH : LOW);
-  digitalWrite(PIN_LED_RED,   ok ? LOW  : HIGH);
+Sonar* pSonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIGGER_PIN, 30000);
+
+static void setLeds(bool ok) {
+  digitalWrite(GREEN_LED_PIN, ok ? HIGH : LOW);
+  digitalWrite(RED_LED_PIN,   ok ? LOW  : HIGH);
 }
 
-static float readDistanceCm() {
-  // HC-SR04 style
-  digitalWrite(PIN_TRIG, LOW);
-  delayMicroseconds(2);
-  digitalWrite(PIN_TRIG, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(PIN_TRIG, LOW);
-
-  unsigned long duration = pulseIn(PIN_ECHO, HIGH, 30000UL); // 30ms timeout ~ 5m
-  if (duration == 0) return -1.0f;
-
-  // speed of sound ~343m/s => 29.1 us/cm round-trip => cm = duration/58
-  float dist = duration / 58.0f;
-  return dist;
-}
-
-static float distanceToLevelCm(float distanceCm) {
-  // If sensor mounted on top: level = tankHeight - distance
+static float distanceToDepthInCm(float distanceCm) {
   if (distanceCm < 0) return -1.0f;
-  float level = TANK_HEIGHT_CM - distanceCm;
-  if (level < 0) level = 0;
-  if (level > TANK_HEIGHT_CM) level = TANK_HEIGHT_CM;
-  return level;
+  float depth = TANK_HEIGHT_CM - distanceCm;
+  if (depth < 0) {
+    depth = 0;
+  } 
+  if (depth > TANK_HEIGHT_CM) {
+    depth = TANK_HEIGHT_CM;  
+  } 
+  return depth;
 }
 
 static bool mqttEnsureConnected() {
   if (mqtt.connected()) return true;
-
-  String clientId = "tms-" + String((uint32_t)ESP.getEfuseMac(), HEX);
-  // No auth in this prototype
+  String clientId = String("esiot-2025-client-water-depth")+String(random(0xffff), HEX);
   return mqtt.connect(clientId.c_str());
 }
 
-static void publishLevel(float levelCm) {
-  // Minimal JSON
-  // {"ts":123456,"level_cm":42.3}
+static void publishWaterDepth(float waterDepth) {
+  // {"timestamp":123456,"waterDepth":78.9}
   unsigned long ts = millis();
   char payload[128];
-  snprintf(payload, sizeof(payload), "{\"ts\":%lu,\"level_cm\":%.2f}", ts, levelCm);
+  snprintf(payload, sizeof(payload), "{\"timestamp\":%lu,\"waterDepth\":%.2f}", ts, waterDepth);
 
-  bool ok = mqtt.publish(TOPIC_LEVEL, payload);
+  bool ok = mqtt.publish(topic, payload);
   if (!ok) {
     state = State::NET_ERROR;
   }
@@ -90,15 +72,15 @@ static void publishLevel(float levelCm) {
 void setup() {
   Serial.begin(115200);
 
-  pinMode(PIN_LED_GREEN, OUTPUT);
-  pinMode(PIN_LED_RED, OUTPUT);
-  setLedsOk(false);
+  pinMode(GREEN_LED_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+  setLeds(false);
 
-  pinMode(PIN_TRIG, OUTPUT);
-  pinMode(PIN_ECHO, INPUT);
+  pinMode(SONAR_TRIGGER_PIN, OUTPUT);
+  pinMode(SONAR_ECHO_PIN, INPUT);
 
   WiFi.mode(WIFI_STA);
-  mqtt.setServer(MQTT_HOST, MQTT_PORT);
+  mqtt.setServer(mqtt_server, 1883);
 
   state = State::WIFI_CONNECTING;
 }
@@ -108,12 +90,12 @@ void loop() {
 
   switch (state) {
     case State::WIFI_CONNECTING: {
-      setLedsOk(false);
+      setLeds(false);
       if (WiFi.status() != WL_CONNECTED) {
         if (now - lastConnectAttemptMs > 3000) {
           lastConnectAttemptMs = now;
           Serial.println("TMS: connecting WiFi...");
-          WiFi.begin(WIFI_SSID, WIFI_PASS);
+          WiFi.begin(ssid, password);
         }
         delay(50);
         return;
@@ -125,7 +107,7 @@ void loop() {
     }
 
     case State::MQTT_CONNECTING: {
-      setLedsOk(false);
+      setLeds(false);
       if (WiFi.status() != WL_CONNECTED) {
         state = State::WIFI_CONNECTING;
         return;
@@ -135,7 +117,7 @@ void loop() {
         Serial.println("TMS: connecting MQTT...");
         if (mqttEnsureConnected()) {
           Serial.println("TMS: MQTT connected");
-          state = State::OPERATIONAL;
+          state = State::FUNCTIONING;
           lastSampleMs = 0;
         }
       }
@@ -144,34 +126,33 @@ void loop() {
       return;
     }
 
-    case State::OPERATIONAL: {
+    case State::FUNCTIONING: {
       if (WiFi.status() != WL_CONNECTED || !mqtt.connected()) {
         state = State::NET_ERROR;
         return;
       }
-      setLedsOk(true);
+      setLeds(true);
       mqtt.loop();
 
       if (now - lastSampleMs >= SAMPLE_PERIOD_MS) {
         lastSampleMs = now;
-        float dist = readDistanceCm();
-        float level = distanceToLevelCm(dist);
+        float dist = pSonar->getDistance();
+        float waterDepth = distanceToDepthInCm(dist);
 
-        if (level < 0) {
+        if (waterDepth < 0) {
           Serial.println("TMS: sonar read error");
-          // still publish? optional. Here publish -1 as invalid.
-          publishLevel(-1.0f);
+          publishWaterDepth(-1.0f);
         } else {
-          Serial.print("TMS: level_cm=");
-          Serial.println(level);
-          publishLevel(level);
+          Serial.print("TMS: waterDepth=");
+          Serial.println(waterDepth);
+          publishWaterDepth(waterDepth);
         }
       }
       return;
     }
 
     case State::NET_ERROR: {
-      setLedsOk(false);
+      setLeds(false);
       if (WiFi.status() != WL_CONNECTED) {
         state = State::WIFI_CONNECTING;
         return;
@@ -182,11 +163,11 @@ void loop() {
         return;
       }
       // If we are here with MQTT connected, recover
-      state = State::OPERATIONAL;
+      state = State::FUNCTIONING;
       return;
     }
 
-    default:
+    case State::INIT:
       state = State::WIFI_CONNECTING;
       return;
   }
