@@ -1,0 +1,9 @@
+.pio
+# PlatformIO build directory
+.pio/
+
+# VSCode settings
+.vscode/
+
+# OS files
+.DS_Store
