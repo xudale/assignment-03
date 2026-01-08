@@ -20,14 +20,18 @@ public:
   void setModeState(MODE_STATE newState);
   MODE_STATE getModeState();
 
+  void setPotState(POT_STATE newState);
+  POT_STATE getPotState();
+
   void setDistance(int distance);
   int getDistance();
-  
+
 private:
   DRONE_STATE droneState;   // REST, TAKING OFF, OUT, LANDING, OUT_WITH_ALARM
   HANGAR_DOOR_STATE hangarDoorState;  // CLOSED, OPEN
   ALARM_STATE alarmState;  // NORMAL, PRE-ALARM, ALARM
   MODE_STATE modeState; // UNCONNECTED, AUTOMATIC, MANUAL
+  POT_STATE potState; // IDLE, ACTIVE
   int distance;
 };
 

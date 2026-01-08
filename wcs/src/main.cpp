@@ -9,6 +9,7 @@
 #include "tasks/HangarDoorTask.h"
 #include "tasks/DroneTask.h"
 #include "tasks/ModeTask.h"
+#include "tasks/POTTask.h"
 #include <LiquidCrystal_I2C.h> 
 
 // #define __TESTING_HW__
@@ -47,10 +48,14 @@ void setup() {
   Task* pModeTask = new ModeTask(pHWPlatform->getButton(), pContext);
   pModeTask->init(1000);
 
+  Task* pPOTTask = new POTTask(pHWPlatform->getPot(), pHWPlatform->getMotor(), pContext);
+  pPOTTask->init(500);
+
   sched.addTask(pAlarmTask);
   sched.addTask(pHangarDoorTask);
   sched.addTask(pDroneTask);
   sched.addTask(pModeTask);
+  sched.addTask(pPOTTask);
 #endif
 }
 

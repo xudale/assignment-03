@@ -17,12 +17,14 @@ void ModeTask::tick(){
         case MODE_STATE::AUTOMATIC : {
             if (pButton->isPressed()){
                 pContext->setModeState(MODE_STATE::MANUAL);
+                pContext->setPotState(POT_STATE::ACTIVE);
             }
             break;
         }
         case MODE_STATE::MANUAL: {
             if (pButton->isPressed()){
                 pContext->setModeState(MODE_STATE::AUTOMATIC);
+                pContext->setPotState(POT_STATE::IDLE);
             }
             break;
         }

@@ -7,6 +7,7 @@
 #include "devices/TempSensorLM35.h"
 #include "devices/Pir.h"
 #include "devices/Sonar.h"
+#include "devices/Pot.h"
 
 class HWPlatform {
 
@@ -20,6 +21,7 @@ public:
   TempSensorLM35* getTempSensor();
   Sonar* getSonar();
   Pir* getPir();
+  Potentiometer* getPot();
 
 private:
   Button* pButton;
@@ -27,6 +29,7 @@ private:
   TempSensorLM35* pTempSensor;
   Sonar* pSonar;
   Pir* pPir;
+  Potentiometer* pPot;
   
 };
 

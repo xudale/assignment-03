@@ -14,6 +14,7 @@ HWPlatform::HWPlatform(){
   pTempSensor = new TempSensorLM35(TEMPERATURE_PIN);
   pSonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIGGER_PIN, 30000);
   pPir = new Pir(PIR_PIN);
+  pPot = new Potentiometer(POT_PIN);
 }
 
 
@@ -38,6 +39,10 @@ Pir* HWPlatform::getPir() {
 
 TempSensorLM35* HWPlatform::getTempSensor() {
   return this->pTempSensor;
+}
+
+Potentiometer* HWPlatform::getPot() {
+  return this->pPot;
 }
 
 void HWPlatform::test(){

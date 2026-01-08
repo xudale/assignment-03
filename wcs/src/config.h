@@ -17,6 +17,7 @@
 #define T2 6000
 
 #define BT_PIN     2
+#define POT_PIN    A0
 #define MOTOR_PIN   9
 #define PIR_PIN    6
 

@@ -22,6 +22,13 @@ MODE_STATE Context::getModeState() {
   return modeState;
 }
 
+void Context::setPotState(POT_STATE newState) {
+  potState = newState;
+}
+POT_STATE Context::getPotState() {
+  return potState;
+}
+
 void Context::setHangarDoorState(HANGAR_DOOR_STATE newState) {
   hangarDoorState = newState;
 }
