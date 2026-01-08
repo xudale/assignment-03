@@ -14,9 +14,6 @@ public:
   void setHangarDoorState(HANGAR_DOOR_STATE newState);
   HANGAR_DOOR_STATE getHangarDoorState();
 
-  void setAlarmState(ALARM_STATE newState);
-  ALARM_STATE getAlarmState();
-
   void setModeState(MODE_STATE newState);
   MODE_STATE getModeState();
 
@@ -29,7 +26,6 @@ public:
 private:
   DRONE_STATE droneState;   // REST, TAKING OFF, OUT, LANDING, OUT_WITH_ALARM
   HANGAR_DOOR_STATE hangarDoorState;  // CLOSED, OPEN
-  ALARM_STATE alarmState;  // NORMAL, PRE-ALARM, ALARM
   MODE_STATE modeState; // UNCONNECTED, AUTOMATIC, MANUAL
   POT_STATE potState; // IDLE, ACTIVE
   int distance;

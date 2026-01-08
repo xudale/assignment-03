@@ -17,8 +17,4 @@ enum class HANGAR_DOOR_STATE : uint8_t {
     CLOSED, OPEN 
 };
 
-enum class ALARM_STATE : uint8_t {
-    NORMAL, PRE_ALARM, ALARM
-};
-
 #endif

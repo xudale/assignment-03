@@ -5,7 +5,6 @@
 #include "kernel/MsgService.h"
 #include "model/HWPlatform.h"
 
-#include "tasks/AlarmTask.h"
 #include "tasks/HangarDoorTask.h"
 #include "tasks/DroneTask.h"
 #include "tasks/ModeTask.h"
@@ -18,7 +17,6 @@ Scheduler sched;
 
 HWPlatform* pHWPlatform;
 Context* pContext;
-AlarmTask* pAlarmTask;
 
 LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27,20,4); 
 void setup() {
@@ -36,9 +34,6 @@ void setup() {
 #ifndef __TESTING_HW__
   pContext = new Context();
 
-  pAlarmTask = new AlarmTask(pHWPlatform->getButton() ,pHWPlatform->getTempSensor(), pContext);
-  pAlarmTask->init(1000);
-
   Task* pHangarDoorTask = new HangarDoorTask(pHWPlatform->getPir(),  pHWPlatform->getSonar(), pHWPlatform->getMotor(), pContext);
   pHangarDoorTask->init(1000);
 
@@ -51,7 +46,6 @@ void setup() {
   Task* pPOTTask = new POTTask(pHWPlatform->getPot(), pHWPlatform->getMotor(), pContext);
   pPOTTask->init(500);
 
-  sched.addTask(pAlarmTask);
   sched.addTask(pHangarDoorTask);
   sched.addTask(pDroneTask);
   sched.addTask(pModeTask);
@@ -62,18 +56,27 @@ void setup() {
 void handleMessage() {
   if (MsgService.isMsgAvailable()) {
     Msg* msg = MsgService.receiveMsg();
-    Logger.log("Received message: " + msg->getContent());
-    if(msg->getContent() == "TAKEOFF" && 
-        pContext->getAlarmState() != ALARM_STATE::ALARM &&
-        pContext->getAlarmState() != ALARM_STATE::PRE_ALARM) {
-        pContext->setDroneState(DRONE_STATE::TAKING_OFF);
-    } else if(msg->getContent() == "LAND" && 
-              pContext->getAlarmState() != ALARM_STATE::ALARM &&
-              pContext->getAlarmState() != ALARM_STATE::PRE_ALARM) {
-        pContext->setDroneState(DRONE_STATE::LANDING);
-    } else if(msg->getContent().startsWith("FAKETEMP")) {
-      int fakeTemp = msg->getContent().substring(9).toInt();
-      pAlarmTask->setFakeTemperature(fakeTemp);
+    String content = msg->getContent();
+    Logger.log("Received message: " + content);
+    if(content.startsWith("MODE:")) {
+      String mode = content.substring(5);
+      if(mode == "AUTOMATIC") {
+        pContext->setModeState(MODE_STATE::AUTOMATIC);
+        Logger.log("dale Set mode to AUTO");
+      } else if(mode == "MANUAL") {
+        pContext->setModeState(MODE_STATE::MANUAL);
+        pContext->setPotState(POT_STATE::ACTIVE);
+        Logger.log("dale Set mode to MANUAL");
+      }
+    } else if(content.startsWith("ANGLE:")) {
+      String angleStr = content.substring(6);
+      int angle = angleStr.toInt();
+      Logger.log("dale Set POT angle to " + String(angle));
+      if (pContext->getModeState() == MODE_STATE::MANUAL) {
+        pContext->setPotState(POT_STATE::IDLE);
+      }
+      // todo set potentiometer angle considering angle from the server and potentiometer
+        
     }
     delete msg;
   }
@@ -104,15 +107,6 @@ void sendMessage() {
         Logger.log(F("HANGAR_DOOR CLOSED"));
       } else if (pContext ->getHangarDoorState() == HANGAR_DOOR_STATE::OPEN) {
         Logger.log(F("HANGAR_DOOR OPEN"));
-      }
-      if (pContext ->getAlarmState() == ALARM_STATE::NORMAL) {
-        Logger.log(F("ALARM NORMAL"));
-      } else if (pContext ->getAlarmState() == ALARM_STATE::PRE_ALARM) {
-        Logger.log(F("ALARM PRE-ALARM"));
-      } else if (pContext ->getAlarmState() == ALARM_STATE::ALARM) {
-        Logger.log(F("ALARM ALARM"));
-        lcd.setCursor(4, 1); 
-        lcd.print("   ALARM    ");
       }
 
       int distance = pContext->getDistance();

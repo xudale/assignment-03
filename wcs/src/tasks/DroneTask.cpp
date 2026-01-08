@@ -14,27 +14,19 @@ void DroneTask::tick(){
             break;
         }
         case DRONE_STATE::TAKING_OFF : {
-            if (pContext->getAlarmState() == ALARM_STATE::ALARM) {
-                setState(DRONE_STATE::REST);
-            } 
+           
             break;
         }
         case DRONE_STATE::OUT: {
-            if (pContext->getAlarmState() == ALARM_STATE::ALARM) {
-                setState(DRONE_STATE::OUT_WITH_ALARM);
-            }
+            
             break;
         }
         case DRONE_STATE::OUT_WITH_ALARM: {
-            if (pContext->getAlarmState() != ALARM_STATE::ALARM) {
-                setState(DRONE_STATE::OUT);
-            }
+           
             break;
         }
         case DRONE_STATE::LANDING: {
-            if (pContext->getAlarmState() == ALARM_STATE::ALARM) {
-                setState(DRONE_STATE::REST);
-            } 
+           
             break;
         }
     }

@@ -23,11 +23,7 @@ void HangarDoorTask::tick(){
             break;
         }
         case HANGAR_DOOR_STATE::OPEN : {
-            if (pContext->getAlarmState() == ALARM_STATE::ALARM) {
-                waitingT1 = false; 
-                waitingT2 = false;
-                setState(HANGAR_DOOR_STATE::CLOSED);
-            } else if (pContext->getDroneState() == DRONE_STATE::TAKING_OFF &&
+            if (pContext->getDroneState() == DRONE_STATE::TAKING_OFF &&
                        distance > D1) {
                 waitingT2 = false;
                 if (!waitingT1) {

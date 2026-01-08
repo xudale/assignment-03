@@ -1,13 +1,6 @@
 #ifndef __CONFIG__
 #define __CONFIG__
 
-// Alarm Temperature
-#define TEMP1 50
-#define TEMP2 100
-#define T3 3000
-#define T4 3000
-#define TEMPERATURE_PIN A0
-
 // Sonar
 #define SONAR_TRIGGER_PIN 8
 #define SONAR_ECHO_PIN 7
