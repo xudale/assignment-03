@@ -3,7 +3,6 @@
 #include "devices/ButtonImpl.h"
 #include "kernel/MsgService.h"
 #include "config.h"
-#include "devices/Led.h"
 #include "devices/ServoMotorImpl.h"
 #include "kernel/Logger.h"
 
@@ -11,9 +10,6 @@ void wakeUp(){}
 
 HWPlatform::HWPlatform(){
   pButton = new ButtonImpl(BT_PIN);
-  pLeds[0] = new Led(LED1_PIN);
-  pLeds[1] = new Led(LED2_PIN);
-  pLeds[2] = new Led(LED3_PIN);
   pMotor = new ServoMotorImpl(MOTOR_PIN);
   pTempSensor = new TempSensorLM35(TEMPERATURE_PIN);
   pSonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIGGER_PIN, 30000);
@@ -26,14 +22,6 @@ void HWPlatform::init(){
 
 Button* HWPlatform::getButton(){
   return this->pButton;
-}
-
-Led* HWPlatform::getLed(int index) {
-  if (index < 3) {
-      return this->pLeds[index];
-  } else {
-      return nullptr;
-  }
 }
 
 ServoMotor* HWPlatform::getMotor(){

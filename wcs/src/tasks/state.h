@@ -13,7 +13,4 @@ enum class ALARM_STATE : uint8_t {
     NORMAL, PRE_ALARM, ALARM
 };
 
-enum class LED_STATE : uint8_t {
-    IDLE, OFF, ON
-};
 #endif

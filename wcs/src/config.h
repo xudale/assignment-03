@@ -1,11 +1,6 @@
 #ifndef __CONFIG__
 #define __CONFIG__
 
-// Three LEDs
-#define LED1_PIN 13
-#define LED2_PIN 12
-#define LED3_PIN 11
-
 // Alarm Temperature
 #define TEMP1 50
 #define TEMP2 100

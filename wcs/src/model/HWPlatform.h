@@ -3,7 +3,6 @@
 
 #include "config.h"
 #include "devices/Button.h"
-#include "devices/Led.h"
 #include "devices/ServoMotor.h"
 #include "devices/TempSensorLM35.h"
 #include "devices/Pir.h"
@@ -17,7 +16,6 @@ public:
   void test();
 
   Button* getButton();
-  Led* getLed(int index);
   ServoMotor* getMotor();
   TempSensorLM35* getTempSensor();
   Sonar* getSonar();
@@ -25,7 +23,6 @@ public:
 
 private:
   Button* pButton;
-  Led* pLeds[3];
   ServoMotor* pMotor;
   TempSensorLM35* pTempSensor;
   Sonar* pSonar;

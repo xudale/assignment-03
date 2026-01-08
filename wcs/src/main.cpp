@@ -4,9 +4,7 @@
 #include "kernel/Logger.h"
 #include "kernel/MsgService.h"
 #include "model/HWPlatform.h"
-#include "tasks/LED1Task.h"
-#include "tasks/LED2Task.h"
-#include "tasks/LED3Task.h"
+
 #include "tasks/AlarmTask.h"
 #include "tasks/HangarDoorTask.h"
 #include "tasks/DroneTask.h"
@@ -27,22 +25,14 @@ void setup() {
   MsgService.init();
   sched.init(50);
 
-  Logger.log(":::::: Drone Hangar ::::::");
+  Logger.log(":::::: WCS ::::::");
   
   pHWPlatform = new HWPlatform();
   pHWPlatform->init();
+  
 
 #ifndef __TESTING_HW__
   pContext = new Context();
-
-  Task* pled1Task = new LED1Task(pHWPlatform->getLed(0), pContext);
-  pled1Task->init(100);
-
-  Task* pled2Task = new LED2Task(pHWPlatform->getLed(1), pContext);
-  pled2Task->init(250);
-
-  Task* pled3Task = new LED3Task(pHWPlatform->getLed(2), pContext);
-  pled3Task->init(100);
 
   pAlarmTask = new AlarmTask(pHWPlatform->getButton() ,pHWPlatform->getTempSensor(), pContext);
   pAlarmTask->init(1000);
@@ -53,9 +43,6 @@ void setup() {
   Task* pDroneTask = new DroneTask(pContext);
   pDroneTask->init(500);
 
-  sched.addTask(pled1Task);
-  sched.addTask(pled2Task);
-  sched.addTask(pled3Task);
   sched.addTask(pAlarmTask);
   sched.addTask(pHangarDoorTask);
   sched.addTask(pDroneTask);
