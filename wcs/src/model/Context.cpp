@@ -4,6 +4,7 @@ Context::Context(){
   droneState = DRONE_STATE::REST;
   hangarDoorState = HANGAR_DOOR_STATE::CLOSED;
   alarmState = ALARM_STATE::NORMAL;
+  modeState = MODE_STATE::UNCONNECTED;
   distance = 0;
 }
 
@@ -12,6 +13,13 @@ void Context::setDroneState(DRONE_STATE newState) {
 }
 DRONE_STATE Context::getDroneState() {
   return droneState;
+}
+
+void Context::setModeState(MODE_STATE newState) {
+  modeState = newState;
+}
+MODE_STATE Context::getModeState() {
+  return modeState;
 }
 
 void Context::setHangarDoorState(HANGAR_DOOR_STATE newState) {
