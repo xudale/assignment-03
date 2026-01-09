@@ -1,0 +1,103 @@
+:root {
+  color-scheme: light;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #eef1f6;
+  color: #1d2433;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 24px 40px 12px;
+}
+
+h1 {
+  margin: 0 0 6px;
+  font-size: 28px;
+}
+
+.subtitle {
+  margin: 0;
+  color: #5a6478;
+}
+
+main {
+  flex: 1;
+  padding: 20px 40px 40px;
+  display: grid;
+  gap: 20px;
+}
+
+.panel {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 8px 20px rgba(27, 34, 62, 0.08);
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b93a6;
+}
+
+.value {
+  display: block;
+  font-size: 18px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.controls .control-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 0;
+}
+
+button {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button.primary {
+  background: #1b5ff7;
+  color: #fff;
+}
+
+button.secondary {
+  background: #dfe6f3;
+  color: #1d2433;
+}
+
+input[type="range"] {
+  flex: 1;
+}
+
+.hint {
+  color: #77819a;
+  font-size: 13px;
+  margin: 0;
+}
+
+footer {
+  padding: 16px 40px;
+  font-size: 13px;
+  color: #748099;
+}

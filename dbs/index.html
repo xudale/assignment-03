@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Tank Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Smart Tank Monitoring Dashboard</h1>
+    <p class="subtitle">Rainwater level and valve control</p>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h2>System Status</h2>
+      <div class="status-grid">
+        <div>
+          <span class="label">Mode</span>
+          <span id="mode" class="value">-</span>
+        </div>
+        <div>
+          <span class="label">System State</span>
+          <span id="systemState" class="value">-</span>
+        </div>
+        <div>
+          <span class="label">Water Depth</span>
+          <span id="waterDepth" class="value">-</span>
+        </div>
+        <div>
+          <span class="label">Valve Opening</span>
+          <span id="valve" class="value">-</span>
+        </div>
+        <div>
+          <span class="label">Last Update</span>
+          <span id="lastUpdate" class="value">-</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Water Level History</h2>
+      <canvas id="chart" width="800" height="280"></canvas>
+    </section>
+
+    <section class="panel controls">
+      <h2>Controls</h2>
+      <div class="control-row">
+        <button id="autoBtn" class="primary">Automatic Mode</button>
+        <button id="manualBtn" class="secondary">Manual Mode</button>
+      </div>
+      <div class="control-row">
+        <label for="valveSlider">Valve Opening (%)</label>
+        <input id="valveSlider" type="range" min="0" max="100" value="0" />
+        <span id="valveValue">0%</span>
+        <button id="sendValve" class="secondary">Send</button>
+      </div>
+      <p class="hint">Manual valve control is enabled only when the system is in MANUAL mode.</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>Powered by the CUS backend</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
