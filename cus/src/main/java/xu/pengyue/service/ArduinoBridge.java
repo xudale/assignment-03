@@ -2,63 +2,107 @@ package xu.pengyue.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import xu.pengyue.config.AppConfig;
 import xu.pengyue.serial.SerialCommChannel;
 import xu.pengyue.serial.SerialPorts;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ArduinoBridge {
+    private static final Logger logger = LoggerFactory.getLogger(ArduinoBridge.class);
+
     private final AppConfig cfg;
-    private final SerialCommChannel channel;
+    private final TankService tankService;
 
-    @Autowired
-    private  HangarService hangarService;   // your service that holds state
-
+    private SerialCommChannel channel;
     private volatile boolean running = true;
 
-    public ArduinoBridge(AppConfig cfg) throws Exception {
+    public ArduinoBridge(AppConfig cfg, TankService tankService) {
         this.cfg = cfg;
-        String usbPortName = new SerialPorts().getUSBPortName();
-        System.out.println(usbPortName);
-        this.channel  = new SerialCommChannel(usbPortName,this.cfg.serial.baud);
-        System.out.println(this.cfg.serial.baud);
+        this.tankService = tankService;
     }
 
     @PostConstruct
     public void start() {
-        Thread t = new Thread(this::receiveLoop, "arduino-receiver");
-        t.setDaemon(true);
-        t.start();
+        try {
+            String usbPortName = new SerialPorts().getUSBPortName();
+            if (usbPortName == null) {
+                logger.warn("No USB serial port detected. WCS bridge disabled.");
+                return;
+            }
+            channel = new SerialCommChannel(usbPortName, cfg.getSerial().getBaud());
+            logger.info("Connected to WCS on {} at {} baud", usbPortName, cfg.getSerial().getBaud());
+
+            Thread t = new Thread(this::receiveLoop, "arduino-receiver");
+            t.setDaemon(true);
+            t.start();
+        } catch (Exception ex) {
+            logger.error("Failed to initialize Arduino bridge", ex);
+        }
     }
 
     private void receiveLoop() {
-        while (running) {
+        while (running && channel != null) {
             try {
-                String msg = channel.receiveMsg();  // blocking
+                String msg = channel.receiveMsg();
                 handleArduinoMessage(msg.trim());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.warn("Error while receiving from Arduino", e);
             }
         }
     }
 
     private void handleArduinoMessage(String msg) {
-//        System.out.println("From Arduino: " + msg);
-        hangarService.updateFromArduino(msg);
+        if (msg.startsWith("MODE_STATE::")) {
+            String mode = msg.substring("MODE_STATE::".length()).trim();
+            if ("AUTOMATIC".equalsIgnoreCase(mode)) {
+                tankService.updateFromWcsMode(TankService.Mode.AUTOMATIC);
+            } else if ("MANUAL".equalsIgnoreCase(mode)) {
+                tankService.updateFromWcsMode(TankService.Mode.MANUAL);
+            } else if ("UNCONNECTED".equalsIgnoreCase(mode)) {
+                tankService.updateFromWcsMode(TankService.Mode.UNCONNECTED);
+            }
+            return;
+        }
+
+        if (msg.startsWith("Sync:Percentage:")) {
+            String value = msg.substring("Sync:Percentage:".length()).trim();
+            try {
+                int percentage = Integer.parseInt(value);
+                tankService.updateValvePercentage(percentage);
+            } catch (NumberFormatException ex) {
+                logger.debug("Invalid percentage from WCS: {}", msg);
+            }
+            return;
+        }
+
+        logger.debug("WCS: {}", msg);
     }
 
-    public void sendCommand(String cmd) {
-        channel.sendMsg(cmd);
+    public void sendMode(String mode) {
+        if (channel == null) {
+            return;
+        }
+        channel.sendMsg("MODE:" + mode);
+    }
+
+    public void sendPercentage(int percentage) {
+        if (channel == null) {
+            return;
+        }
+        channel.sendMsg("PERCENTAGE:" + percentage);
     }
 
     @PreDestroy
     public void shutdown() {
         running = false;
-        channel.close();
+        if (channel != null) {
+            channel.close();
+        }
     }
 }

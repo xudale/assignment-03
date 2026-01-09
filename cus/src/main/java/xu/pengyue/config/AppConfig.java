@@ -1,30 +1,39 @@
 package xu.pengyue.config;
 
+import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ConfigurationProperties(prefix = "app")
+@Data
 public class AppConfig {
-    public Mqtt mqtt = new Mqtt();
-    public Serial serial = new Serial();
-    public Policy policy = new Policy();
-    public History history = new History();
+    private Mqtt mqtt = new Mqtt();
+    private Serial serial = new Serial();
+    private Policy policy = new Policy();
+    private History history = new History();
 
+    @Data
     public static class Mqtt {
-        public String host;
-        public String topicLevel;
+        private String host;
+        private String topicLevel;
     }
+
+    @Data
     public static class Serial {
-        public int baud;
+        private int baud;
     }
+
+    @Data
     public static class Policy {
-        public double l1;
-        public double l2;
-        public long t1Ms;
-        public long t2Ms;
+        private double l1;
+        private double l2;
+        private long t1Ms;
+        private long t2Ms;
     }
+
+    @Data
     public static class History {
-        public int n;
+        private int n;
     }
 }
