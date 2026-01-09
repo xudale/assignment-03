@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+app:
+  mqtt:
+    host: tcp://broker.mqtt-dashboard.com
+    topicLevel: esiot/waterDepth
+  serial:
+    baud: 115200
+  policy:
+    l1: 60.0
+    l2: 80.0
+    t1Ms: 10000
+    t2Ms: 15000
+  history:
+    n: 60

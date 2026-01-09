@@ -2,6 +2,7 @@ package xu.pengyue.service;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import xu.pengyue.config.AppConfig;
 import xu.pengyue.serial.SerialCommChannel;
 import xu.pengyue.serial.SerialPorts;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class ArduinoBridge {
-
+    private final AppConfig cfg;
     private final SerialCommChannel channel;
 
     @Autowired
@@ -17,10 +18,12 @@ public class ArduinoBridge {
 
     private volatile boolean running = true;
 
-    public ArduinoBridge() throws Exception {
+    public ArduinoBridge(AppConfig cfg) throws Exception {
+        this.cfg = cfg;
         String usbPortName = new SerialPorts().getUSBPortName();
         System.out.println(usbPortName);
-        this.channel  = new SerialCommChannel(usbPortName,115200);
+        this.channel  = new SerialCommChannel(usbPortName,this.cfg.serial.baud);
+        System.out.println(this.cfg.serial.baud);
     }
 
     @PostConstruct
