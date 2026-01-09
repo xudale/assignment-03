@@ -11,8 +11,6 @@ void wakeUp(){}
 HWPlatform::HWPlatform(){
   pButton = new ButtonImpl(BT_PIN);
   pMotor = new ServoMotorImpl(MOTOR_PIN);
-  pSonar = new Sonar(SONAR_ECHO_PIN, SONAR_TRIGGER_PIN, 30000);
-  pPir = new Pir(PIR_PIN);
   pPot = new Potentiometer(POT_PIN);
 }
 
@@ -27,15 +25,6 @@ Button* HWPlatform::getButton(){
 ServoMotor* HWPlatform::getMotor(){
   return this->pMotor;
 }
-
-Sonar* HWPlatform::getSonar() {
-  return this->pSonar;
-}
-
-Pir* HWPlatform::getPir() {
-  return this->pPir;
-}
-
 
 Potentiometer* HWPlatform::getPot() {
   return this->pPot;

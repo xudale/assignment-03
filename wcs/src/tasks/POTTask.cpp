@@ -19,6 +19,7 @@ void POTTask::tick(){
             int angle = (int)(potValue * 90); // Scale to 0-90 degrees
             Logger.log("dale POTTask: Potentiometer value = " + String(potValue) + ", setting motor angle to " + String(angle));
             pMotor->on();
+            pContext->setPercentage((int)(potValue * 100));
             pMotor->setPosition(angle);
             break;
         }        

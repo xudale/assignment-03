@@ -18,6 +18,7 @@ void ModeTask::tick(){
             if (pButton->isPressed()){
                 pContext->setModeState(MODE_STATE::MANUAL);
                 pContext->setPotState(POT_STATE::ACTIVE);
+                Logger.log("Sync:Mode:MANUAL");
             }
             break;
         }
@@ -25,6 +26,7 @@ void ModeTask::tick(){
             if (pButton->isPressed()){
                 pContext->setModeState(MODE_STATE::AUTOMATIC);
                 pContext->setPotState(POT_STATE::IDLE);
+                Logger.log("Sync:Mode:AUTOMATIC");
             }
             break;
         }

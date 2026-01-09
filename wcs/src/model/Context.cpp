@@ -1,9 +1,8 @@
 #include "Context.h"
 
 Context::Context(){
-  hangarDoorState = HANGAR_DOOR_STATE::CLOSED;
   modeState = MODE_STATE::UNCONNECTED;
-  distance = 0;
+  percentage = 0;
 }
 
 void Context::setModeState(MODE_STATE newState) {
@@ -20,17 +19,10 @@ POT_STATE Context::getPotState() {
   return potState;
 }
 
-void Context::setHangarDoorState(HANGAR_DOOR_STATE newState) {
-  hangarDoorState = newState;
+void Context::setPercentage(int percentage) {
+  this->percentage = percentage;
 }
-HANGAR_DOOR_STATE Context::getHangarDoorState() {
-  return hangarDoorState;
-}
-
-void Context::setDistance(int distance) {
-  this->distance = distance;
-}
-int Context::getDistance() {
-  return distance;
+int Context::getPercentage() {
+  return percentage;
 }
 

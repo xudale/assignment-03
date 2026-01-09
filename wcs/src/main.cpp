@@ -5,7 +5,6 @@
 #include "kernel/MsgService.h"
 #include "model/HWPlatform.h"
 
-#include "tasks/HangarDoorTask.h"
 #include "tasks/ModeTask.h"
 #include "tasks/POTTask.h"
 #include <LiquidCrystal_I2C.h> 
@@ -33,16 +32,12 @@ void setup() {
 #ifndef __TESTING_HW__
   pContext = new Context();
 
-  Task* pHangarDoorTask = new HangarDoorTask(pHWPlatform->getPir(),  pHWPlatform->getSonar(), pHWPlatform->getMotor(), pContext);
-  pHangarDoorTask->init(1000);
-
   Task* pModeTask = new ModeTask(pHWPlatform->getButton(), pContext);
   pModeTask->init(1000);
 
   Task* pPOTTask = new POTTask(pHWPlatform->getPot(), pHWPlatform->getMotor(), pContext);
   pPOTTask->init(500);
 
-  sched.addTask(pHangarDoorTask);
   sched.addTask(pModeTask);
   sched.addTask(pPOTTask);
 #endif
@@ -75,6 +70,7 @@ void handleMessage() {
         pContext->setPotState(POT_STATE::IDLE);
         int angle = (int)(percentage * 90); // Scale to 0-90 degrees
         pHWPlatform->getMotor()->on();
+        pContext->setPercentage(percentage);
         pHWPlatform->getMotor()->setPosition(angle);
       } 
       if (percentage > 0 && pContext->getModeState() == MODE_STATE::UNCONNECTED) {
@@ -86,22 +82,25 @@ void handleMessage() {
 }
 
 void sendMessage() {
-    static int count = 0;
-    lcd.setCursor(4, 1); 
-    if (count++ >= 10) {
-      
-
-      if (pContext ->getHangarDoorState() == HANGAR_DOOR_STATE::CLOSED) {
-        Logger.log(F("HANGAR_DOOR CLOSED"));
-      } else if (pContext ->getHangarDoorState() == HANGAR_DOOR_STATE::OPEN) {
-        Logger.log(F("HANGAR_DOOR OPEN"));
-      }
-
-      int distance = pContext->getDistance();
-      Logger.log("DISTANCE " + String(distance));
-
-      count = 0;
+  static int count = 0;
+  lcd.setCursor(4, 1); 
+  if (count++ >= 10) {
+    if (pContext->getModeState() == MODE_STATE::AUTOMATIC) {
+      Logger.log(F("MODE_STATE::AUTOMATIC"));
+      lcd.print("AUTOMATIC");
+    } else if (pContext->getModeState() == MODE_STATE::MANUAL) {
+      Logger.log(F("MODE_STATE::MANUAL"));
+      lcd.print("MANUAL");
+    } else {
+      Logger.log(F("MODE_STATE::UNCONNECTED"));
+      lcd.print("UNCONNECTED");
     }
+    String percentageStr = String(pContext->getPercentage());
+    Logger.log("Sync:Percentage:" + percentageStr);
+    lcd.setCursor(2, 2); 
+    lcd.print("Percentage: " + percentageStr + "%");
+    count = 0;
+  }
 }
 
 void loop() {

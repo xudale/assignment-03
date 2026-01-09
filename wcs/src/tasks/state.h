@@ -9,8 +9,4 @@ enum class POT_STATE : uint8_t {
     IDLE, ACTIVE
 };
 
-enum class HANGAR_DOOR_STATE : uint8_t {
-    CLOSED, OPEN 
-};
-
 #endif
