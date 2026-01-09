@@ -1,17 +1,9 @@
 #include "Context.h"
 
 Context::Context(){
-  droneState = DRONE_STATE::REST;
   hangarDoorState = HANGAR_DOOR_STATE::CLOSED;
   modeState = MODE_STATE::UNCONNECTED;
   distance = 0;
-}
-
-void Context::setDroneState(DRONE_STATE newState) {
-  droneState = newState;
-}
-DRONE_STATE Context::getDroneState() {
-  return droneState;
 }
 
 void Context::setModeState(MODE_STATE newState) {

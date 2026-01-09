@@ -6,7 +6,6 @@
 #include "model/HWPlatform.h"
 
 #include "tasks/HangarDoorTask.h"
-#include "tasks/DroneTask.h"
 #include "tasks/ModeTask.h"
 #include "tasks/POTTask.h"
 #include <LiquidCrystal_I2C.h> 
@@ -37,9 +36,6 @@ void setup() {
   Task* pHangarDoorTask = new HangarDoorTask(pHWPlatform->getPir(),  pHWPlatform->getSonar(), pHWPlatform->getMotor(), pContext);
   pHangarDoorTask->init(1000);
 
-  Task* pDroneTask = new DroneTask(pContext);
-  pDroneTask->init(500);
-
   Task* pModeTask = new ModeTask(pHWPlatform->getButton(), pContext);
   pModeTask->init(1000);
 
@@ -47,7 +43,6 @@ void setup() {
   pPOTTask->init(500);
 
   sched.addTask(pHangarDoorTask);
-  sched.addTask(pDroneTask);
   sched.addTask(pModeTask);
   sched.addTask(pPOTTask);
 #endif
@@ -62,21 +57,29 @@ void handleMessage() {
       String mode = content.substring(5);
       if(mode == "AUTOMATIC") {
         pContext->setModeState(MODE_STATE::AUTOMATIC);
+        pContext->setPotState(POT_STATE::IDLE);
         Logger.log("dale Set mode to AUTO");
       } else if(mode == "MANUAL") {
         pContext->setModeState(MODE_STATE::MANUAL);
         pContext->setPotState(POT_STATE::ACTIVE);
         Logger.log("dale Set mode to MANUAL");
       }
-    } else if(content.startsWith("ANGLE:")) {
-      String angleStr = content.substring(6);
-      int angle = angleStr.toInt();
-      Logger.log("dale Set POT angle to " + String(angle));
-      if (pContext->getModeState() == MODE_STATE::MANUAL) {
+    } else if(content.startsWith("PERCENTAGE:")) {
+      String percentageStr = content.substring(11);
+      int percentage = percentageStr.toInt();
+      Logger.log("dale Set POT percentage to " + String(percentage));
+      if (percentage < 0) {
+        pContext->setModeState(MODE_STATE::UNCONNECTED);
         pContext->setPotState(POT_STATE::IDLE);
+      } else {
+        pContext->setPotState(POT_STATE::IDLE);
+        int angle = (int)(percentage * 90); // Scale to 0-90 degrees
+        pHWPlatform->getMotor()->on();
+        pHWPlatform->getMotor()->setPosition(angle);
+      } 
+      if (percentage > 0 && pContext->getModeState() == MODE_STATE::UNCONNECTED) {
+        Logger.log("dale in error");
       }
-      // todo set potentiometer angle considering angle from the server and potentiometer
-        
     }
     delete msg;
   }
@@ -86,22 +89,7 @@ void sendMessage() {
     static int count = 0;
     lcd.setCursor(4, 1); 
     if (count++ >= 10) {
-      if (pContext ->getDroneState() == DRONE_STATE::REST) {
-        Logger.log(F("DRONE REST"));
-        lcd.print("DRONE INSIDE");
-      } else if (pContext ->getDroneState() == DRONE_STATE::TAKING_OFF) {
-        Logger.log(F("DRONE TAKING_OFF"));
-        lcd.print("  TAKE OFF  ");
-      } else if (pContext ->getDroneState() == DRONE_STATE::OUT) {
-        Logger.log(F("DRONE OUT"));
-        lcd.print(" DRONE OUT  ");
-      } else if (pContext ->getDroneState() == DRONE_STATE::OUT_WITH_ALARM) {
-        Logger.log(F("DRONE OUT WITH ALARM"));
-        lcd.print(" DRONE OUT  ");
-      } else if (pContext ->getDroneState() == DRONE_STATE::LANDING) {
-        Logger.log(F("DRONE LANDING"));
-        lcd.print("  LANDING   ");
-      }
+      
 
       if (pContext ->getHangarDoorState() == HANGAR_DOOR_STATE::CLOSED) {
         Logger.log(F("HANGAR_DOOR CLOSED"));

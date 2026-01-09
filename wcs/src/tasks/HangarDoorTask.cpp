@@ -16,40 +16,10 @@ void HangarDoorTask::tick(){
     pPir->sync();
     switch (state){    
         case HANGAR_DOOR_STATE::CLOSED: {
-            if (pContext->getDroneState() == DRONE_STATE::LANDING || 
-                pContext->getDroneState() == DRONE_STATE::TAKING_OFF) {
-                setState(HANGAR_DOOR_STATE::OPEN);
-            }
-            break;
+           
         }
         case HANGAR_DOOR_STATE::OPEN : {
-            if (pContext->getDroneState() == DRONE_STATE::TAKING_OFF &&
-                       distance > D1) {
-                waitingT2 = false;
-                if (!waitingT1) {
-                    waitingT1 = true;
-                    stateTimestamp = millis();
-                }
-                if (waitingT1 && elapsedTimeInState() >= T1) { 
-                    setState(HANGAR_DOOR_STATE::CLOSED);    
-                    pContext->setDroneState(DRONE_STATE::OUT);    
-                }
-            } else if (pContext->getDroneState() == DRONE_STATE::LANDING &&
-                       distance < D2) {
-                waitingT1 = false; 
-                if (!waitingT2) {
-                    waitingT2 = true;
-                    stateTimestamp = millis();
-                }
-                if (waitingT2 && elapsedTimeInState() >= T2 && pPir->isDetected()) { 
-                    setState(HANGAR_DOOR_STATE::CLOSED);    
-                    pContext->setDroneState(DRONE_STATE::REST);    
-                }
-            } else {
-                waitingT1 = false;
-                waitingT2 = false; 
-            }
-            break;
+           
         }
     }
 }
