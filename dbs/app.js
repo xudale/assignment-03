@@ -4,8 +4,34 @@ const modeEl = document.getElementById("mode");
 const waterDepthEl = document.getElementById("waterDepth");
 const valveEl = document.getElementById("valve");
 const lastUpdateEl = document.getElementById("lastUpdate");
-const chart = document.getElementById("chart");
-const ctx = chart.getContext("2d");
+const chart = Highcharts.chart("chart", {
+  chart: {
+    type: "line",
+    height: 280,
+  },
+  title: {
+    text: "Real-time Water Depth Data",
+  },
+  xAxis: {
+    visible: false,
+  },
+  yAxis: {
+    title: {
+      text: "Water Depth (cm)",
+    },
+    min: 0,
+    max: 100,
+  },
+  series: [
+    {
+      name: "Water Depth",
+      data: [],
+    },
+  ],
+  credits: {
+    enabled: false,
+  },
+});
 
 const autoBtn = document.getElementById("autoBtn");
 const manualBtn = document.getElementById("manualBtn");
@@ -73,47 +99,21 @@ function setUnavailable() {
 }
 
 function drawChart(history) {
-  ctx.clearRect(0, 0, chart.width, chart.height);
-  ctx.fillStyle = "#f5f7fb";
-  ctx.fillRect(0, 0, chart.width, chart.height);
+  
 
   if (!history.length) {
-    ctx.fillStyle = "#666";
-    ctx.font = "16px sans-serif";
-    ctx.fillText("No data available", 20, 30);
+    chart.series[0].setData([], true);
+    chart.setTitle(null, { text: "No data available" });
     return;
   }
 
-  const padding = 40;
-  const width = chart.width - padding * 2;
-  const height = chart.height - padding * 2;
+  const seriesData = history.map((item) => [
+    item.timestamp ?? Date.now(),
+    item.waterDepth ?? 0,
+  ]);
 
-  const values = history.map((item) => item.waterDepth);
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  const range = Math.max(max - min, 1);
-
-  ctx.strokeStyle = "#1b5ff7";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-
-  history.forEach((item, index) => {
-    const x = padding + (index / (history.length - 1)) * width;
-    const normalized = (item.waterDepth - min) / range;
-    const y = padding + height - normalized * height;
-    if (index === 0) {
-      ctx.moveTo(x, y);
-    } else {
-      ctx.lineTo(x, y);
-    }
-  });
-
-  ctx.stroke();
-
-  ctx.fillStyle = "#333";
-  ctx.font = "12px sans-serif";
-  ctx.fillText(`${max.toFixed(1)} cm`, 10, padding);
-  ctx.fillText(`${min.toFixed(1)} cm`, 10, padding + height);
+  chart.series[0].setData(seriesData, true);
+  chart.setTitle(null, { text: "" });
 }
 
 async function sendMode(mode) {

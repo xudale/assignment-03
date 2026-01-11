@@ -9,7 +9,6 @@
 <body>
   <header>
     <h1>Smart Tank Monitoring Dashboard</h1>
-    <p class="subtitle">Rainwater level and valve control</p>
   </header>
 
   <main>
@@ -36,8 +35,7 @@
     </section>
 
     <section class="panel">
-      <h2>Water Level History</h2>
-      <canvas id="chart" width="800" height="280"></canvas>
+      <div id="chart"></div>
     </section>
 
     <section class="panel controls">
@@ -55,11 +53,7 @@
       <p class="hint">Manual valve control is enabled only when the system is in MANUAL mode.</p>
     </section>
   </main>
-
-  <footer>
-    <span>Powered by the CUS backend</span>
-  </footer>
-
+  <script src="https://code.highcharts.com/highcharts.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
