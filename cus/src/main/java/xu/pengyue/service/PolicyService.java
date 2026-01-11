@@ -45,6 +45,7 @@ public class PolicyService {
             if (now - lastUpdateMs > config.getPolicy().getT2Ms()) {
                 if (tankService.getMode() != TankService.Mode.UNCONNECTED) {
                     tankService.setMode(TankService.Mode.UNCONNECTED);
+                    resetLastCommandedPercentageForAutomaticMode();
                     arduinoBridge.sendPercentage(-1);
                 }
             }
