@@ -1,7 +1,6 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = `http://127.0.0.1:8080/api`;
 
 const modeEl = document.getElementById("mode");
-const systemStateEl = document.getElementById("systemState");
 const waterDepthEl = document.getElementById("waterDepth");
 const valveEl = document.getElementById("valve");
 const lastUpdateEl = document.getElementById("lastUpdate");
@@ -33,22 +32,43 @@ async function fetchStatus() {
 
 function updateStatus(data) {
   modeEl.textContent = data.mode ?? "-";
-  systemStateEl.textContent = data.systemState ?? "-";
   waterDepthEl.textContent = `${(data.waterDepth ?? 0).toFixed(2)} cm`;
   valveEl.textContent = `${data.valvePercentage ?? 0}%`;
   lastUpdateEl.textContent = data.lastUpdateMs
     ? new Date(data.lastUpdateMs).toLocaleTimeString()
     : "-";
+  autoBtn.classList = "";
+  manualBtn.classList = "";
+  if (["AUTOMATIC", "MANUAL"].includes(data.mode)) {
+    if (data.mode === "AUTOMATIC") {
+      autoBtn.classList.add("primary");
+      manualBtn.classList.add("secondary");
+      sendValveBtn.classList.add("disabled");
+    } else if (data.mode === "MANUAL") {
+      manualBtn.classList.add("primary");
+      autoBtn.classList.add("secondary");
+      sendValveBtn.classList.remove("disabled");
+    }
+  } else {
+    autoBtn.classList.add("disabled");
+    manualBtn.classList.add("disabled");
+    sendValveBtn.classList.add("disabled");
+  }
 
   drawChart(data.history ?? []);
 }
 
 function setUnavailable() {
-  modeEl.textContent = "-";
-  systemStateEl.textContent = "NOT AVAILABLE";
+  modeEl.textContent = "NOT AVAILABLE";
   waterDepthEl.textContent = "-";
   valveEl.textContent = "-";
   lastUpdateEl.textContent = "-";
+  autoBtn.classList = "";
+  manualBtn.classList = "";
+  sendValveBtn.classList = "";
+  autoBtn.classList.add("disabled");
+  manualBtn.classList.add("disabled");
+  sendValveBtn.classList.add("disabled");
   drawChart([]);
 }
 
@@ -108,7 +128,8 @@ async function sendMode(mode) {
   }
 }
 
-async function sendValve() {
+async function sendValve(event) {
+  if (event.target.classList.contains("disabled")) return;
   try {
     await fetch(`${API_BASE}/valve`, {
       method: "POST",
@@ -120,8 +141,14 @@ async function sendValve() {
   }
 }
 
-autoBtn.addEventListener("click", () => sendMode("AUTOMATIC"));
-manualBtn.addEventListener("click", () => sendMode("MANUAL"));
+autoBtn.addEventListener("click", () => {
+  if (autoBtn.classList.contains("disabled")) return;
+  sendMode("AUTOMATIC")
+});
+manualBtn.addEventListener("click", () => {
+  if (manualBtn.classList.contains("disabled")) return;
+  sendMode("MANUAL");
+});
 sendValveBtn.addEventListener("click", sendValve);
 
 fetchStatus();

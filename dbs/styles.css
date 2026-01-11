@@ -86,6 +86,12 @@ button.secondary {
   color: #1d2433;
 }
 
+button.disabled {
+  background: grey;
+  color: #1d2433;
+  cursor: not-allowed;
+}
+
 input[type="range"] {
   flex: 1;
 }
