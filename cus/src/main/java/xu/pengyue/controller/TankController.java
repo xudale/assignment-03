@@ -2,6 +2,7 @@ package xu.pengyue.controller;
 
 import xu.pengyue.dto.TankStatusDto;
 import xu.pengyue.service.ArduinoBridge;
+import xu.pengyue.service.PolicyService;
 import xu.pengyue.service.TankService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,10 +16,12 @@ public class TankController {
 
     private final TankService tankService;
     private final ArduinoBridge arduinoBridge;
+    private final PolicyService policyService;
 
-    public TankController(TankService tankService, ArduinoBridge arduinoBridge) {
+    public TankController(TankService tankService, ArduinoBridge arduinoBridge, PolicyService policyService) {
         this.tankService = tankService;
         this.arduinoBridge = arduinoBridge;
+        this.policyService = policyService;
     }
 
     @GetMapping("/status")
@@ -32,6 +35,7 @@ public class TankController {
         if ("MANUAL".equalsIgnoreCase(mode)) {
             tankService.setMode(TankService.Mode.MANUAL);
             arduinoBridge.sendMode("MANUAL");
+            policyService.resetLastCommandedPercentageForAutomaticMode();
             return ResponseEntity.ok().build();
         }
         if ("AUTOMATIC".equalsIgnoreCase(mode)) {
