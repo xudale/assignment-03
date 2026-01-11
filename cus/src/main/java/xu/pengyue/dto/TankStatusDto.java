@@ -13,7 +13,6 @@ public class TankStatusDto {
     private double waterDepth;
     private int valvePercentage;
     private String mode;
-    private String systemState;
     private long lastUpdateMs;
     private List<WaterLevelSampleDto> history;
 }

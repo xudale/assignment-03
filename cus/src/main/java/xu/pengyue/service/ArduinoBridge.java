@@ -58,18 +58,18 @@ public class ArduinoBridge {
     }
 
     private void handleArduinoMessage(String msg) {
-        if (msg.startsWith("MODE_STATE::")) {
-            String mode = msg.substring("MODE_STATE::".length()).trim();
+        System.out.println("From arduino " + msg);
+        if (msg.startsWith("Sync:Mode:")) {
+            String mode = msg.substring("Sync:Mode:".length()).trim();
             if ("AUTOMATIC".equalsIgnoreCase(mode)) {
-                tankService.updateFromWcsMode(TankService.Mode.AUTOMATIC);
+                tankService.setMode(TankService.Mode.AUTOMATIC);
             } else if ("MANUAL".equalsIgnoreCase(mode)) {
-                tankService.updateFromWcsMode(TankService.Mode.MANUAL);
-            } else if ("UNCONNECTED".equalsIgnoreCase(mode)) {
-                tankService.updateFromWcsMode(TankService.Mode.UNCONNECTED);
+                tankService.setMode(TankService.Mode.MANUAL);
+            } else if ("UNCONNECTED".equalsIgnoreCase((mode))) {
+                tankService.setMode(TankService.Mode.UNCONNECTED);
             }
             return;
         }
-
         if (msg.startsWith("Sync:Percentage:")) {
             String value = msg.substring("Sync:Percentage:".length()).trim();
             try {
@@ -88,14 +88,14 @@ public class ArduinoBridge {
         if (channel == null) {
             return;
         }
-        channel.sendMsg("MODE:" + mode);
+        channel.sendMsg("MODE:" + mode + "\n");
     }
 
     public void sendPercentage(int percentage) {
         if (channel == null) {
             return;
         }
-        channel.sendMsg("PERCENTAGE:" + percentage);
+        channel.sendMsg("PERCENTAGE:" + percentage + "\n");
     }
 
     @PreDestroy

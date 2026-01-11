@@ -8,9 +8,9 @@ app:
   serial:
     baud: 115200
   policy:
-    l1: 60.0
-    l2: 80.0
-    t1Ms: 10000
-    t2Ms: 15000
+    l1: 70.0
+    l2: 95.0
+    t1Ms: 5000
+    t2Ms: 8000
   history:
     n: 60

@@ -19,48 +19,31 @@ public class PolicyService {
         this.arduinoBridge = arduinoBridge;
     }
 
+    /* called by mqtt */
     public void onWaterDepth(double waterDepth, long timestamp) {
         tankService.recordWaterDepth(waterDepth, timestamp);
-
+        System.out.println(tankService.getMode());
         if (tankService.getMode() == TankService.Mode.UNCONNECTED) {
-            tankService.recoverFromUnconnected();
-            sendModeIfNeeded(tankService.getMode());
+            tankService.setMode(TankService.Mode.AUTOMATIC);
+            arduinoBridge.sendMode("AUTOMATIC");
         }
 
-        if (tankService.getMode() != TankService.Mode.AUTOMATIC) {
-            return;
+        if (tankService.getMode() == TankService.Mode.AUTOMATIC) {
+            int targetPercentage = computeAutomaticPercentage(waterDepth);
+            sendValvePercentage(targetPercentage);
         }
-
-        int targetPercentage = computeAutomaticPercentage(waterDepth);
-        maybeSendValvePercentage(targetPercentage);
-    }
-
-    public void requestMode(TankService.Mode mode) {
-        tankService.setRequestedMode(mode);
-        if (mode != TankService.Mode.UNCONNECTED) {
-            sendModeIfNeeded(mode);
-        }
-    }
-
-    public void requestManualPercentage(int percentage) {
-        if (tankService.getMode() != TankService.Mode.MANUAL) {
-            return;
-        }
-        tankService.updateValvePercentage(percentage);
-        maybeSendValvePercentage(percentage);
     }
 
     @Scheduled(fixedDelay = 1000)
     public void checkConnectivity() {
         long lastUpdateMs = tankService.getLastUpdateMs();
-        if (lastUpdateMs == 0) {
-            return;
-        }
-        long now = System.currentTimeMillis();
-        if (now - lastUpdateMs > config.getPolicy().getT2Ms()) {
-            if (tankService.getMode() != TankService.Mode.UNCONNECTED) {
-                tankService.markUnconnected();
-                arduinoBridge.sendPercentage(-1);
+        if (lastUpdateMs > 0) {
+            long now = System.currentTimeMillis();
+            if (now - lastUpdateMs > config.getPolicy().getT2Ms()) {
+                if (tankService.getMode() != TankService.Mode.UNCONNECTED) {
+                    tankService.setMode(TankService.Mode.UNCONNECTED);
+                    arduinoBridge.sendPercentage(-1);
+                }
             }
         }
     }
@@ -89,20 +72,11 @@ public class PolicyService {
         return 0;
     }
 
-    private void maybeSendValvePercentage(int percentage) {
-        if (percentage == lastCommandedPercentage) {
-            return;
-        }
-        lastCommandedPercentage = percentage;
+    private void sendValvePercentage(int percentage) {
         tankService.updateValvePercentage(percentage);
-        arduinoBridge.sendPercentage(percentage);
-    }
-
-    private void sendModeIfNeeded(TankService.Mode mode) {
-        if (mode == TankService.Mode.MANUAL) {
-            arduinoBridge.sendMode("MANUAL");
-        } else if (mode == TankService.Mode.AUTOMATIC) {
-            arduinoBridge.sendMode("AUTOMATIC");
+        if (percentage != lastCommandedPercentage) {
+            lastCommandedPercentage = percentage;
+            arduinoBridge.sendPercentage(percentage);
         }
     }
 }

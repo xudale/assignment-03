@@ -37,10 +37,6 @@ public class MqttSubscriberService {
         try {
             String clientId = "cus-" + System.currentTimeMillis();
             client = new MqttClient(config.getMqtt().getHost(), clientId);
-            MqttConnectOptions options = new MqttConnectOptions();
-            options.setAutomaticReconnect(true);
-            options.setCleanSession(true);
-
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
@@ -57,7 +53,7 @@ public class MqttSubscriberService {
                 }
             });
 
-            client.connect(options);
+            client.connect();
             client.subscribe(config.getMqtt().getTopicLevel(), 1);
             logger.info("Subscribed to {}", config.getMqtt().getTopicLevel());
         } catch (MqttException e) {
@@ -71,6 +67,7 @@ public class MqttSubscriberService {
             double waterDepth = node.path("waterDepth").asDouble(-1.0);
             long timestamp = node.path("timestamp").asLong(System.currentTimeMillis());
             policyService.onWaterDepth(waterDepth, timestamp);
+            System.out.println(waterDepth);
         } catch (Exception ex) {
             logger.warn("Failed to parse MQTT payload: {}", new String(message.getPayload()), ex);
         }

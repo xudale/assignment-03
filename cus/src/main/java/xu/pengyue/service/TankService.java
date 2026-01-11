@@ -21,11 +21,9 @@ public class TankService {
 
     private final int historySize;
     private final Deque<WaterLevelSampleDto> history;
-
     private double waterDepth;
     private int valvePercentage;
-    private Mode mode = Mode.AUTOMATIC;
-    private Mode requestedMode = Mode.AUTOMATIC;
+    private Mode mode = Mode.UNCONNECTED;
     private long lastUpdateMs;
 
     public TankService(AppConfig config) {
@@ -43,54 +41,21 @@ public class TankService {
     }
 
     public synchronized void updateValvePercentage(int valvePercentage) {
-        this.valvePercentage = Math.max(0, Math.min(100, valvePercentage));
+        this.valvePercentage = valvePercentage;
     }
 
     public synchronized void setMode(Mode mode) {
         this.mode = mode;
     }
 
-    public synchronized void setRequestedMode(Mode mode) {
-        this.requestedMode = mode;
-        if (this.mode != Mode.UNCONNECTED) {
-            this.mode = mode;
-        }
-    }
-
-    public synchronized Mode getRequestedMode() {
-        return requestedMode;
-    }
-
     public synchronized Mode getMode() {
         return mode;
-    }
-
-    public synchronized void markUnconnected() {
-        this.mode = Mode.UNCONNECTED;
-    }
-
-    public synchronized void recoverFromUnconnected() {
-        if (mode == Mode.UNCONNECTED) {
-            mode = requestedMode;
-        }
-    }
-
-    public synchronized void updateFromWcsMode(Mode mode) {
-        if (mode == Mode.UNCONNECTED) {
-            this.mode = Mode.UNCONNECTED;
-        } else {
-            this.requestedMode = mode;
-            if (this.mode != Mode.UNCONNECTED) {
-                this.mode = mode;
-            }
-        }
     }
 
     public synchronized TankStatusDto getStatus() {
         return new TankStatusDto(
                 waterDepth,
                 valvePercentage,
-                mode.name(),
                 mode.name(),
                 lastUpdateMs,
                 new ArrayList<>(history)
