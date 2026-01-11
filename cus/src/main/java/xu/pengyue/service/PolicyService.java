@@ -19,6 +19,9 @@ public class PolicyService {
         this.arduinoBridge = arduinoBridge;
     }
 
+    public void resetLastCommandedPercentageForAutomaticMode() {
+        lastCommandedPercentage = -99;
+    }
     /* called by mqtt */
     public void onWaterDepth(double waterDepth, long timestamp) {
         tankService.recordWaterDepth(waterDepth, timestamp);
