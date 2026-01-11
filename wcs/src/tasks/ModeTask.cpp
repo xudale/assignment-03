@@ -12,6 +12,7 @@ void ModeTask::tick(){
     Logger.log(String("dale ModeTask: Current Mode State = ") + (currentState == MODE_STATE::UNCONNECTED ? "UNCONNECTED" : currentState == MODE_STATE::AUTOMATIC ? "AUTOMATIC" : "MANUAL"));
     switch (currentState){    
         case MODE_STATE::UNCONNECTED : {
+            Logger.log("Sync:Mode:UNCONNECTED");
             break;
         }
         case MODE_STATE::AUTOMATIC : {

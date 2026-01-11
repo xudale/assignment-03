@@ -68,7 +68,7 @@ void handleMessage() {
         pContext->setPotState(POT_STATE::IDLE);
       } else {
         pContext->setPotState(POT_STATE::IDLE);
-        int angle = (int)(percentage * 90); // Scale to 0-90 degrees
+        int angle = (int)(percentage * 90) / 100; // Scale to 0-90 degrees
         pHWPlatform->getMotor()->on();
         pContext->setPercentage(percentage);
         pHWPlatform->getMotor()->setPosition(angle);
@@ -87,10 +87,10 @@ void sendMessage() {
   if (count++ >= 10) {
     if (pContext->getModeState() == MODE_STATE::AUTOMATIC) {
       Logger.log(F("MODE_STATE::AUTOMATIC"));
-      lcd.print("AUTOMATIC");
+      lcd.print("AUTOMATIC   ");
     } else if (pContext->getModeState() == MODE_STATE::MANUAL) {
       Logger.log(F("MODE_STATE::MANUAL"));
-      lcd.print("MANUAL");
+      lcd.print("MANUAL    ");
     } else {
       Logger.log(F("MODE_STATE::UNCONNECTED"));
       lcd.print("UNCONNECTED");
@@ -98,7 +98,7 @@ void sendMessage() {
     String percentageStr = String(pContext->getPercentage());
     Logger.log("Sync:Percentage:" + percentageStr);
     lcd.setCursor(2, 2); 
-    lcd.print("Percentage: " + percentageStr + "%");
+    lcd.print("Percentage: " + percentageStr + "%  ");
     count = 0;
   }
 }
