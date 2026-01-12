@@ -1,5 +1,6 @@
 package xu.pengyue.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import xu.pengyue.dto.TankStatusDto;
 import xu.pengyue.service.ArduinoBridge;
 import xu.pengyue.service.PolicyService;
@@ -14,13 +15,11 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class TankController {
 
-    private final TankService tankService;
-    private final ArduinoBridge arduinoBridge;
+    @Autowired
+    private TankService tankService;
 
-    public TankController(TankService tankService, ArduinoBridge arduinoBridge) {
-        this.tankService = tankService;
-        this.arduinoBridge = arduinoBridge;
-    }
+    @Autowired
+    private ArduinoBridge arduinoBridge;
 
     @GetMapping("/status")
     public TankStatusDto getStatus() {

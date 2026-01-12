@@ -1,23 +1,21 @@
 package xu.pengyue.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import xu.pengyue.config.AppConfig;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 @Service
 public class PolicyService {
-    private final AppConfig config;
-    private final TankService tankService;
-    private final ArduinoBridge arduinoBridge;
+    @Autowired
+    private AppConfig config;
+    @Autowired
+    private TankService tankService;
+    @Autowired
+    private ArduinoBridge arduinoBridge;
 
     private Long overL1SinceMs;
     private int lastCommandedPercentage = -1;
-
-    public PolicyService(AppConfig config, TankService tankService, ArduinoBridge arduinoBridge) {
-        this.config = config;
-        this.tankService = tankService;
-        this.arduinoBridge = arduinoBridge;
-    }
 
     public void resetLastCommandedPercentageForAutomaticMode() {
         lastCommandedPercentage = -99;

@@ -4,6 +4,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xu.pengyue.config.AppConfig;
 import xu.pengyue.serial.SerialCommChannel;
@@ -13,16 +14,14 @@ import xu.pengyue.serial.SerialPorts;
 public class ArduinoBridge {
     private static final Logger logger = LoggerFactory.getLogger(ArduinoBridge.class);
 
-    private final AppConfig cfg;
-    private final TankService tankService;
+    @Autowired
+    private AppConfig cfg;
+
+    @Autowired
+    private TankService tankService;
 
     private SerialCommChannel channel;
     private volatile boolean running = true;
-
-    public ArduinoBridge(AppConfig cfg, TankService tankService) {
-        this.cfg = cfg;
-        this.tankService = tankService;
-    }
 
     @PostConstruct
     public void start() {

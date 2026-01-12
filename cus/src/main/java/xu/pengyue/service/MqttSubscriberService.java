@@ -12,6 +12,7 @@ import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import xu.pengyue.config.AppConfig;
 
@@ -20,17 +21,14 @@ public class MqttSubscriberService {
 
     private static final Logger logger = LoggerFactory.getLogger(MqttSubscriberService.class);
 
-    private final AppConfig config;
-    private final PolicyService policyService;
-    private final ObjectMapper objectMapper;
+    @Autowired
+    private AppConfig config;
+    @Autowired
+    private PolicyService policyService;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private MqttClient client;
-
-    public MqttSubscriberService(AppConfig config, PolicyService policyService, ObjectMapper objectMapper) {
-        this.config = config;
-        this.policyService = policyService;
-        this.objectMapper = objectMapper;
-    }
 
     @PostConstruct
     public void start() {
