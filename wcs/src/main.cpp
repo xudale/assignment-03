@@ -47,22 +47,23 @@ void handleMessage() {
   if (MsgService.isMsgAvailable()) {
     Msg* msg = MsgService.receiveMsg();
     String content = msg->getContent();
-    Logger.log("Received message: " + content);
     if(content.startsWith("MODE:")) {
       String mode = content.substring(5);
       if(mode == "AUTOMATIC") {
         pContext->setModeState(MODE_STATE::AUTOMATIC);
         pContext->setPotState(POT_STATE::IDLE);
-        Logger.log("dale Set mode to AUTO");
       } else if(mode == "MANUAL") {
         pContext->setModeState(MODE_STATE::MANUAL);
         pContext->setPotState(POT_STATE::ACTIVE);
-        Logger.log("dale Set mode to MANUAL");
+      } else if(mode.startsWith("RESET")) {
+        pContext->setModeState(MODE_STATE::AUTOMATIC);
+        pContext->setPotState(POT_STATE::IDLE);
+        pContext->setPercentage(0);
+        pHWPlatform->getMotor()->setPosition(0);
       }
     } else if(content.startsWith("PERCENTAGE:")) {
       String percentageStr = content.substring(11);
       int percentage = percentageStr.toInt();
-      Logger.log("dale Set POT percentage to " + String(percentage));
       if (percentage < 0) {
         pContext->setModeState(MODE_STATE::UNCONNECTED);
         pContext->setPotState(POT_STATE::IDLE);
@@ -73,9 +74,6 @@ void handleMessage() {
         pContext->setPercentage(percentage);
         pHWPlatform->getMotor()->setPosition(angle);
       } 
-      if (percentage > 0 && pContext->getModeState() == MODE_STATE::UNCONNECTED) {
-        Logger.log("dale in error");
-      }
     }
     delete msg;
   }
@@ -83,17 +81,14 @@ void handleMessage() {
 
 void sendMessage() {
   static int count = 0;
-  lcd.setCursor(4, 1); 
+  lcd.setCursor(4, 1);
   if (count++ >= 10) {
     if (pContext->getModeState() == MODE_STATE::AUTOMATIC) {
-      Logger.log(F("MODE_STATE::AUTOMATIC"));
-      lcd.print("AUTOMATIC   ");
+      lcd.print(F("AUTOMATIC   "));
     } else if (pContext->getModeState() == MODE_STATE::MANUAL) {
-      Logger.log(F("MODE_STATE::MANUAL"));
-      lcd.print("MANUAL    ");
+      lcd.print(F("MANUAL    "));
     } else {
-      Logger.log(F("MODE_STATE::UNCONNECTED"));
-      lcd.print("UNCONNECTED");
+      lcd.print(F("UNCONNECTED"));
     }
     String percentageStr = String(pContext->getPercentage());
     Logger.log("Sync:Percentage:" + percentageStr);

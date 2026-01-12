@@ -9,17 +9,16 @@ ModeTask::ModeTask(Button* pButton, Context* pContext):
 
 void ModeTask::tick(){
     const MODE_STATE currentState = pContext->getModeState();
-    Logger.log(String("dale ModeTask: Current Mode State = ") + (currentState == MODE_STATE::UNCONNECTED ? "UNCONNECTED" : currentState == MODE_STATE::AUTOMATIC ? "AUTOMATIC" : "MANUAL"));
     switch (currentState){    
         case MODE_STATE::UNCONNECTED : {
-            Logger.log("Sync:Mode:UNCONNECTED");
+            Logger.log(F("Sync:Mode:UNCONNECTED"));
             break;
         }
         case MODE_STATE::AUTOMATIC : {
             if (pButton->isPressed()){
                 pContext->setModeState(MODE_STATE::MANUAL);
                 pContext->setPotState(POT_STATE::ACTIVE);
-                Logger.log("Sync:Mode:MANUAL");
+                Logger.log(F("Sync:Mode:MANUAL"));
             }
             break;
         }
@@ -27,7 +26,7 @@ void ModeTask::tick(){
             if (pButton->isPressed()){
                 pContext->setModeState(MODE_STATE::AUTOMATIC);
                 pContext->setPotState(POT_STATE::IDLE);
-                Logger.log("Sync:Mode:AUTOMATIC");
+                Logger.log(F("Sync:Mode:AUTOMATIC"));
             }
             break;
         }
