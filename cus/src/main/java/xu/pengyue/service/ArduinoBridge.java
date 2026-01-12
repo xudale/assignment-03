@@ -88,14 +88,14 @@ public class ArduinoBridge {
         if (channel == null) {
             return;
         }
-        channel.sendMsg("MODE:" + mode + "\n");
+        channel.sendMsg("MODE:" + mode);
     }
 
     public void sendPercentage(int percentage) {
         if (channel == null) {
             return;
         }
-        channel.sendMsg("PERCENTAGE:" + percentage + "\n");
+        channel.sendMsg("PERCENTAGE:" + percentage);
     }
 
     @PreDestroy

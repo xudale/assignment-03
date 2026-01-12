@@ -67,7 +67,6 @@ public class MqttSubscriberService {
             double waterDepth = node.path("waterDepth").asDouble(-1.0);
             long timestamp = node.path("timestamp").asLong(System.currentTimeMillis());
             policyService.onWaterDepth(waterDepth, timestamp);
-            System.out.println(waterDepth);
         } catch (Exception ex) {
             logger.warn("Failed to parse MQTT payload: {}", new String(message.getPayload()), ex);
         }

@@ -25,13 +25,13 @@ public class PolicyService {
     /* called by mqtt */
     public void onWaterDepth(double waterDepth, long timestamp) {
         tankService.recordWaterDepth(waterDepth, timestamp);
-        System.out.println(tankService.getMode());
+        if (tankService.getMode() != TankService.Mode.AUTOMATIC) {
+            resetLastCommandedPercentageForAutomaticMode();
+        }
         if (tankService.getMode() == TankService.Mode.UNCONNECTED) {
             tankService.setMode(TankService.Mode.AUTOMATIC);
-            arduinoBridge.sendMode("AUTOMATIC");
-        }
-
-        if (tankService.getMode() == TankService.Mode.AUTOMATIC) {
+            arduinoBridge.sendMode("RESET");
+        } else if (tankService.getMode() == TankService.Mode.AUTOMATIC) {
             int targetPercentage = computeAutomaticPercentage(waterDepth);
             sendValvePercentage(targetPercentage);
         }
@@ -45,7 +45,6 @@ public class PolicyService {
             if (now - lastUpdateMs > config.getPolicy().getT2Ms()) {
                 if (tankService.getMode() != TankService.Mode.UNCONNECTED) {
                     tankService.setMode(TankService.Mode.UNCONNECTED);
-                    resetLastCommandedPercentageForAutomaticMode();
                     arduinoBridge.sendPercentage(-1);
                 }
             }

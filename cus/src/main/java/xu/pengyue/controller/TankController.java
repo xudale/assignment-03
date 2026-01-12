@@ -16,12 +16,10 @@ public class TankController {
 
     private final TankService tankService;
     private final ArduinoBridge arduinoBridge;
-    private final PolicyService policyService;
 
-    public TankController(TankService tankService, ArduinoBridge arduinoBridge, PolicyService policyService) {
+    public TankController(TankService tankService, ArduinoBridge arduinoBridge) {
         this.tankService = tankService;
         this.arduinoBridge = arduinoBridge;
-        this.policyService = policyService;
     }
 
     @GetMapping("/status")
@@ -35,7 +33,6 @@ public class TankController {
         if ("MANUAL".equalsIgnoreCase(mode)) {
             tankService.setMode(TankService.Mode.MANUAL);
             arduinoBridge.sendMode("MANUAL");
-            policyService.resetLastCommandedPercentageForAutomaticMode();
             return ResponseEntity.ok().build();
         }
         if ("AUTOMATIC".equalsIgnoreCase(mode)) {
